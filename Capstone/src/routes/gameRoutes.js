@@ -11,12 +11,26 @@ router.post('/game/start', verifyToken, gameControllers.startGame);
 
 router.post('/game/leave', verifyToken, gameControllers.leaveGame);
 
-router.get('/game/:game_id/players', gameControllers.getPlayers);
+router.post('/game/:game_id/deal', verifyToken, gameControllers.dealCards);
 
-router.get('/game/:game_id/current-player', gameControllers.getCurrentPlayer);
+router.post('/game/:game_id/play/:cardPlayed', verifyToken, gameControllers.playCard);
 
-router.get('/game/:game_id/top-card', gameControllers.getTopCard);
+router.post('/game/:game_id/draw', verifyToken, gameControllers.drawCard);
 
-router.get('/game/:game_id/scores', gameControllers.getScores);
+router.post('/game/:game_id/say-uno', verifyToken, gameControllers.sayUno);
+
+router.post('/game/:game_id/challenge-uno/:challenged_player_id', verifyToken, gameControllers.challengeUno);
+
+router.get('/game/:gameId/state', verifyToken, gameControllers.getGameState);
+
+router.get('/game/:game_id/players', verifyToken, gameControllers.getPlayers);
+
+router.get('/game/:game_id/current-player', verifyToken, gameControllers.getCurrentPlayer);
+
+router.get('/game/:game_id/top-card', verifyToken, gameControllers.getTopCard);
+
+router.get('/game/:game_id/hand/', verifyToken, gameControllers.getPlayerHand);
+
+router.get('/game/:game_id/scores', verifyToken, gameControllers.getScores);
 
 module.exports = router;
