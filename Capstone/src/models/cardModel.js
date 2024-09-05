@@ -17,6 +17,10 @@ const Card = sequelize.define('Card', {
     gameId: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: true  
     }
 });
 

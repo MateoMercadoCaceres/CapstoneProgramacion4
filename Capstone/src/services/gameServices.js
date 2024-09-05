@@ -396,8 +396,10 @@ function isValidPlay(playedColor, playedValue, topColor, topValue) {
 async function applySpecialCardEffects(game, playedValue) {
     switch (playedValue) {
         case 'Skip':
+            game.currentPlayerId = await getNextPlayerId(game);
             break;
         case 'Reverse':
+            game.currentPlayerId = game.currentPlayerId === game.Users[0].id ? game.Users[game.Users.length - 1].id : game.Users[0].id;
             break;
         case 'Draw Two':
             const nextPlayerId = await getNextPlayerId(game);
@@ -411,5 +413,8 @@ async function applySpecialCardEffects(game, playedValue) {
 }
 
 async function getNextPlayerId(game) {
-    //tarea 7
+    const players = await game.getUsers();
+    const currentIndex = players.findIndex(player => player.id === game.currentPlayerId);
+    const nextIndex = (currentIndex + 1) % players.length;
+    return players[nextIndex].id;
 }

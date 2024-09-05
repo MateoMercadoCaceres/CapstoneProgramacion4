@@ -175,6 +175,206 @@ describe('Game Controllers', () => {
     });
   });
 
+  describe('dealCards', () => {
+    it('should deal cards successfully', async () => {
+      mockRequest.body = { game_id: 1, cardsPerPlayer: 5 };
+      const mockHands = { 'Player 1': ['Red 0', 'Blue 5', 'Green 2'], 'Player 2': ['Yellow 7', 'Wild', 'Draw Two'] };
+      gameServices.dealCards.mockResolvedValue(mockHands);
+
+      await gameControllers.dealCards(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        message: "Cards dealt successfully.",
+        players: mockHands
+      });
+    });
+
+    it('should return 400 status on error', async () => {
+      gameServices.dealCards.mockRejectedValue(new Error('Deal cards failed'));
+
+      await gameControllers.dealCards(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Deal cards failed' });
+    });
+  });
+
+  describe('playCard', () => {
+    it('should play a card successfully', async () => {
+      mockRequest.params = { game_id: 1, cardPlayed: 1 };
+      const mockResult = { message: "Card played successfully", cardPlayed: "Red 5", newTopCard: "Blue 3", nextPlayer: 2 };
+      gameServices.playCard.mockResolvedValue(mockResult);
+
+      await gameControllers.playCard(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith(mockResult);
+    });
+
+    it('should return 404 status on "Game not found" error', async () => {
+      gameServices.playCard.mockRejectedValue(new Error('Game not found'));
+
+      await gameControllers.playCard(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Game not found' });
+    });
+
+    it('should return 400 status on other errors', async () => {
+      gameServices.playCard.mockRejectedValue(new Error('Invalid play'));
+
+      await gameControllers.playCard(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Invalid play' });
+    });
+  });
+
+  describe('drawCard', () => {
+    it('should draw a card successfully', async () => {
+      mockRequest.params = { game_id: 1 };
+      const mockResult = { message: "Player drew a card from the deck.", cardDrawn: "Red 5" };
+      gameServices.drawCard.mockResolvedValue(mockResult);
+
+      await gameControllers.drawCard(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith(mockResult);
+    });
+
+    it('should return 400 status on error', async () => {
+      gameServices.drawCard.mockRejectedValue(new Error('Draw card failed'));
+
+      await gameControllers.drawCard(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Draw card failed' });
+    });
+  });
+
+  describe('sayUno', () => {
+    it('should allow a player to say UNO successfully', async () => {
+      mockRequest.body = { game_id: 1 };
+      const mockResult = { message: "Player said UNO successfully" };
+      gameServices.sayUno.mockResolvedValue(mockResult);
+
+      await gameControllers.sayUno(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith(mockResult);
+    });
+
+    it('should return 400 status on error', async () => {
+      gameServices.sayUno.mockRejectedValue(new Error('Say UNO failed'));
+
+      await gameControllers.sayUno(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Say UNO failed' });
+    });
+  });
+
+  describe('challengeUno', () => {
+    it('should challenge UNO successfully', async () => {
+      mockRequest.body = { game_id: 1, challenged_player_id: 2 };
+      const mockResult = { message: "Challenge successful. Challenged player draws 2 cards.", drawnCards: ['Red 5', 'Blue 3'] };
+      gameServices.challengeUno.mockResolvedValue(mockResult);
+
+      await gameControllers.challengeUno(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith(mockResult);
+    });
+
+    it('should return 400 status on error', async () => {
+      gameServices.challengeUno.mockRejectedValue(new Error('Challenge UNO failed'));
+
+      await gameControllers.challengeUno(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Challenge UNO failed' });
+    });
+  });
+
+  describe('getGameState', () => {
+    it('should get the current game state successfully', async () => {
+      mockRequest.params = { game_id: 1 };
+      const mockGameState = {
+        currentPlayer: 1,
+        topCard: 'Red 5',
+        hands: {
+          'Player 1': ['Blue 3', 'Green 7'],
+          'Player 2': ['Yellow 2', 'Wild']
+        }
+      };
+      gameServices.getGameState.mockResolvedValue(mockGameState);
+
+      await gameControllers.getGameState(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith(mockGameState);
+    });
+
+    it('should return 400 status on error', async () => {
+      gameServices.getGameState.mockRejectedValue(new Error('Get game state failed'));
+
+      await gameControllers.getGameState(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Get game state failed' });
+    });
+  });
+
+  describe('getPlayerHand', () => {
+    it('should get the player\'s hand successfully', async () => {
+      mockRequest.params = { game_id: 1 };
+      const mockHand = ['Red 5', 'Green 2', 'Blue 7'];
+      gameServices.getPlayerHand.mockResolvedValue(mockHand);
+
+      await gameControllers.getPlayerHand(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith({ playerID: 1, hand: mockHand });
+    });
+
+    it('should return 400 status on error', async () => {
+      gameServices.getPlayerHand.mockRejectedValue(new Error('Get player hand failed'));
+
+      await gameControllers.getPlayerHand(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Get player hand failed' });
+    });
+  });
+
+  describe('getMoveHistory', () => {
+    it('should get the move history successfully', async () => {
+      mockRequest.params = { game_id: 1 };
+      const mockHistory = [
+        { player: 'Player 1', card: 'Red 5' },
+        { player: 'Player 2', card: 'Blue 3' },
+        { player: 'Player 1', card: 'Green 7' }
+      ];
+      gameServices.getMoveHistory.mockResolvedValue({ history: mockHistory });
+
+      await gameControllers.getMoveHistory(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith({ history: mockHistory });
+    });
+
+    it('should return 400 status on error', async () => {
+      gameServices.getMoveHistory.mockRejectedValue(new Error('Get move history failed'));
+
+      await gameControllers.getMoveHistory(mockRequest, mockResponse);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Get move history failed' });
+    });
+  });
+
+
   describe('getScores', () => {
     it('should get scores successfully', async () => {
       mockRequest.params = { game_id: 1 };
